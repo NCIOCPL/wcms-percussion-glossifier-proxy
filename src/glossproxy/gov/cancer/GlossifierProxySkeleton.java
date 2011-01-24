@@ -43,7 +43,7 @@ public class GlossifierProxySkeleton{
 	public glossproxy.gov.cancer.GlossifyResponse glossify
               (glossproxy.gov.cancer.Glossify glossify)
     {
-		String urlString = "http://verdi.nci.nih.gov/u/glossify"; //default url
+		String urlString = "http://pdqupdate.cancer.gov/u/glossify"; //default url
 		try {
 			props = new PropertiesConfiguration(PROPS_FILE_NAME);
 			if (props != null)
