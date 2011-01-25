@@ -43,6 +43,7 @@ public class GlossifierProxySkeleton{
 	public glossproxy.gov.cancer.GlossifyResponse glossify
               (glossproxy.gov.cancer.Glossify glossify)
     {
+		//System.out.println("Entering glossify");		
 		String urlString = "http://pdqupdate.cancer.gov/u/glossify"; //default url
 		try {
 			props = new PropertiesConfiguration(PROPS_FILE_NAME);
@@ -52,6 +53,7 @@ public class GlossifierProxySkeleton{
 		catch (Exception e) {
 			System.out.println("Props file didn't load: " + e.getLocalizedMessage());
 		}
+		//System.out.println("glossify: urlString = " + urlString);		
         glossproxy.gov.cancer.GlossifyResponse glossResponse = new glossproxy.gov.cancer.GlossifyResponse();
 		String fragment = glossify.getFragment();
 		glossproxy.gov.cancer.ArrayOfString dictionaries = glossify.getDictionaries();
@@ -59,6 +61,7 @@ public class GlossifierProxySkeleton{
 		
 		//set up soap command
 		String soapCommand = buildSoapCommand(fragment, dictionaries, languages);
+		//System.out.println("glossify: soapCommand = " + soapCommand);		
 		try {
 			//set up request
 			URL url = new URL(urlString);
@@ -73,10 +76,13 @@ public class GlossifierProxySkeleton{
 			 
 			//make connection and get results
 			conn.connect();
+			//System.out.println("glossify: connected");		
 			OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream());
+			//System.out.println("glossify: got outputStreamWriter");		
 			out.write(soapCommand, 0, soapLen);
 			out.flush();
 			InputStream read = conn.getInputStream();
+			//System.out.println("glossify: got inputStream");		
 			//parse the xml
 			SAXBuilder saxBuilder = new SAXBuilder();
 			Document doc = saxBuilder.build(read);
@@ -85,34 +91,34 @@ public class GlossifierProxySkeleton{
 			Element response = null;
 			Element result = null;
 			if (env != null) {
-//				System.out.println("got element: " + env.getName());
+				System.out.println("got element: " + env.getName());
 				List<?> bList = env.getChildren();
 				if (bList != null) {
-//					System.out.println("got list");
+				//	System.out.println("got list");
 					body = (Element)bList.get(0);
 				}
 				if (body != null) {
-//			        System.out.println("got element: " + body.getName());
+			    //    System.out.println("got element: " + body.getName());
 					List<?> respList = body.getChildren();
 					if (respList != null) {
-//						System.out.println("got responselist");
+						System.out.println("got responselist");
 						response = (Element)respList.get(0);
 					}
 				}
 				if (response != null) {
-//			        System.out.println("got element: " + response.getName());
+			    //    System.out.println("got element: " + response.getName());
 					List<?> restList = response.getChildren();
 					if (restList != null) {
-//						System.out.println("got resultlist");
+						System.out.println("got resultlist");
 						result = (Element)restList.get(0);
 					}
 				}
 				if (result != null) {
-//					System.out.println("got element: " + result.getName());
+				//	System.out.println("got element: " + result.getName());
 					List<?> termList = result.getChildren();
 					if (termList != null) {
 						//get array of terms data
-//						System.out.println("got termList, size= " + termList.size());
+						System.out.println("got termList, size= " + termList.size());
 						glossproxy.gov.cancer.Term[] termArray = buildTermsArray(termList);
 						//put the terms data into the glossifyResponse
 		                glossproxy.gov.cancer.ArrayOfTerm arrayOfTerm = new glossproxy.gov.cancer.ArrayOfTerm();
@@ -127,7 +133,8 @@ public class GlossifierProxySkeleton{
 		 catch (Exception e) {
 			 System.out.println("Exception with web service: " + e.getLocalizedMessage());
 		 }
-        return glossResponse;
+		 //System.out.println("glossify: returning");		
+         return glossResponse;
     }
 
 	/**
