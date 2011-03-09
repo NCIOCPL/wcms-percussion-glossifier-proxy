@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.jdom.Document;
@@ -43,7 +44,7 @@ public class GlossifierProxySkeleton{
 	public glossproxy.gov.cancer.GlossifyResponse glossify
               (glossproxy.gov.cancer.Glossify glossify)
     {
-		//System.out.println("Entering glossify");		
+//System.out.println("Entering glossify");		
 		String urlString = "http://pdqupdate.cancer.gov/u/glossify"; //default url
 		try {
 			props = new PropertiesConfiguration(PROPS_FILE_NAME);
@@ -56,12 +57,22 @@ public class GlossifierProxySkeleton{
 		//System.out.println("glossify: urlString = " + urlString);		
         glossproxy.gov.cancer.GlossifyResponse glossResponse = new glossproxy.gov.cancer.GlossifyResponse();
 		String fragment = glossify.getFragment();
+		byte[] bytes;
+		if (fragment != null) {
+			Charset cs = Charset.forName("UTF-8");
+			bytes = fragment.getBytes(cs);
+		}
+		else {
+			bytes = new byte[]{};
+		}
+		String fragment2 = new String(bytes);
+//System.out.println("[glossify] fragment2: " + fragment2);
 		glossproxy.gov.cancer.ArrayOfString dictionaries = glossify.getDictionaries();
 		glossproxy.gov.cancer.ArrayOfString languages = glossify.getLanguages();
 		
 		//set up soap command
-		String soapCommand = buildSoapCommand(fragment, dictionaries, languages);
-		//System.out.println("glossify: soapCommand = " + soapCommand);		
+		String soapCommand = buildSoapCommand(fragment2, dictionaries, languages);
+//System.out.println("[glossify] soapCommand = " + soapCommand);		
 		try {
 			//set up request
 			URL url = new URL(urlString);
@@ -69,7 +80,7 @@ public class GlossifierProxySkeleton{
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
-			conn.setRequestProperty("Content-Type", "text/xml");
+			conn.setRequestProperty("Content-Type", "text/xml;charset=UTF-8");
 			conn.setRequestProperty("SOAPAction", "cips.nci.nih.gov/cdr/glossify");
 			int soapLen = soapCommand.length();
 			conn.setRequestProperty("Content-Length", String.valueOf(soapLen));
@@ -148,7 +159,7 @@ public class GlossifierProxySkeleton{
 									glossproxy.gov.cancer.ArrayOfString dictionaries,
 									glossproxy.gov.cancer.ArrayOfString languages) {
 		//set up first part of soap command with fragment
-		String soapCommand = "<?xml version=\"1.0\"?>" +
+		String soapCommand = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" +
 		"<soapenv:Envelope " +
 		"xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' " +
 		"xmlns:m='cips.nci.nih.gov/cdr'> " +
