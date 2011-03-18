@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.jdom.Document;
@@ -56,11 +57,21 @@ public class GlossifierProxySkeleton{
 		//System.out.println("glossify: urlString = " + urlString);		
         glossproxy.gov.cancer.GlossifyResponse glossResponse = new glossproxy.gov.cancer.GlossifyResponse();
 		String fragment = glossify.getFragment();
+		byte[] bytes;
+		if (fragment != null) {
+			Charset cs = Charset.forName("UTF-8");
+			bytes = fragment.getBytes(cs);
+		}
+		else {
+			bytes = new byte[]{};
+		}
+		String fragment2 = new String(bytes);
+//System.out.println("[glossify] fragment2: " + fragment2);
 		glossproxy.gov.cancer.ArrayOfString dictionaries = glossify.getDictionaries();
 		glossproxy.gov.cancer.ArrayOfString languages = glossify.getLanguages();
 		
 		//set up soap command
-		String soapCommand = buildSoapCommand(fragment, dictionaries, languages);
+		String soapCommand = buildSoapCommand(fragment2, dictionaries, languages);
 		//System.out.println("glossify: soapCommand = " + soapCommand);		
 		try {
 			//set up request
